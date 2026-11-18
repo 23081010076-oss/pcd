@@ -1,6 +1,8 @@
-﻿.venv/
+/.venv/
 __pycache__/
-data/raw/
-data/*.zip
-weights/
-runs/
+/aset_penelitian/dataset/raw/
+/aset_penelitian/dataset/*.zip
+/aset_penelitian/bobot/
+/aset_penelitian/hasil/weights/
+/aset_penelitian/hasil/runs_terstruktur/**/*.pt
+/aset_penelitian/_arsip_lama/

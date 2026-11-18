@@ -4,17 +4,19 @@ Penelitian ini membandingkan citra rontgen tanpa CLAHE dengan citra yang diprose
 
 Implementasi mengikuti slide proposal: satu model EfficientNet-B0, lima kelas Kellgren-Lawrence (KL), grid CLAHE tetap 8x8, dan tiga seed pelatihan. Naskah Word masih mencantumkan alternatif ResNet50; proyek ini menetapkan EfficientNet-B0 agar arsitektur tidak ikut berubah selama perbandingan.
 
-README ini menjelaskan cara menjalankan proyek sekaligus alasan setiap tahap. Hasil yang sudah diperoleh dibedakan dari rancangan yang masih perlu dijalankan. Teks proposal dan slide tersimpan di `references/`; laporan pelaksanaan ada di [reports/STATUS.md](reports/STATUS.md).
+README ini menjelaskan cara menjalankan proyek sekaligus alasan setiap tahap. Hasil yang sudah diperoleh dibedakan dari rancangan yang masih perlu dijalankan. Teks proposal dan slide tersimpan di `aset_penelitian/referensi/`; laporan pelaksanaan ada di [aset_penelitian/referensi/STATUS.md](aset_penelitian/referensi/STATUS.md).
 
 ## Jalankan penelitian dari Jupyter
 
-Buka [penelitian_oa_clahe_full_code.ipynb](penelitian_oa_clahe_full_code.ipynb), pilih kernel `.venv` proyek, lalu gunakan **Run All**. Notebook menampilkan hasil audit, distribusi kelas, gambar CLAHE, dan metrik pilot di bawah pembahasan masing-masing. Untuk pelatihan utama dan evaluasi akhir, gunakan sakelar pada sel pengaturan notebook. Kode audit, preprocessing, pelatihan, dan evaluasi tersedia langsung di dalam sel notebook. Keluaran notebook disimpan di `hasil_notebook_full/`.
+Buka [penelitian_oa_clahe_full_code.ipynb](penelitian_oa_clahe_full_code.ipynb), pilih kernel `.venv` proyek, lalu gunakan **Run All**. Notebook menampilkan hasil audit, distribusi kelas, gambar CLAHE, dan metrik pilot di bawah pembahasan masing-masing. Untuk pelatihan utama dan evaluasi akhir, gunakan sakelar pada sel pengaturan notebook. Kode audit, preprocessing, pelatihan, dan evaluasi tersedia langsung di dalam sel notebook. Keluaran notebook disimpan di `aset_penelitian/hasil/`.
 
 Jika kernel belum tersedia, pasang dependensi notebook di lingkungan proyek:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pip install ipykernel matplotlib
 ```
+
+`aset_penelitian/` mengelompokkan dataset, bobot, keluaran notebook, dan referensi. Lingkungan Python lokal tetap di `.venv/`.
 
 ## Panduan membaca
 
@@ -49,7 +51,7 @@ Dalam rancangan ini, clip limit menjadi variabel yang diubah. Grid, pembagian da
 
 ## Dataset, label, dan audit
 
-Data berasal dari [Knee Osteoarthritis Dataset with Severity Grading di Kaggle][dataset]. Arsip disimpan di `data/dataset.zip`, ekstraksinya di `data/raw/`, dan URL beserta checksum SHA-256 ada di `data/download.json`. Checksum berfungsi sebagai sidik jari berkas agar arsip yang dipakai dapat ditelusuri kembali.
+Data berasal dari [Knee Osteoarthritis Dataset with Severity Grading di Kaggle][dataset]. Arsip disimpan di `aset_penelitian/dataset/dataset.zip`, ekstraksinya di `aset_penelitian/dataset/raw/`, dan URL beserta checksum SHA-256 ada di `aset_penelitian/dataset/download.json`. Checksum berfungsi sebagai sidik jari berkas agar arsip yang dipakai dapat ditelusuri kembali.
 
 Label target mengikuti lima grade KL pada proposal. Kategori berikut adalah ringkasan untuk membaca label dataset, bukan panduan diagnosis mandiri.
 
@@ -72,7 +74,7 @@ Citra dengan piksel identik cukup diwakili satu berkas dalam manifest. Jika piks
 
 Hasil audit yang tersedia: 9.786 PNG dapat dibaca, semuanya grayscale 224x224; tidak ditemukan citra rusak, duplikasi piksel identik, atau konflik label pada piksel identik. Dari jumlah tersebut, 8.260 citra train/val/test menjadi data utama. Sebanyak 1.526 citra `auto_test` dikecualikan karena 811 kandidat ID-nya juga muncul pada data utama; folder tambahan ini tidak dianggap sebagai sampel independen.
 
-File `data/corrupt.csv` yang kosong mencerminkan tidak adanya berkas rusak yang ditemukan. Tabel kosong pada `templates/` adalah format keluaran, bukan hasil audit atau pelatihan.
+File `aset_penelitian/hasil/corrupt.csv` kosong karena audit tidak menemukan berkas rusak.
 
 ## Pembagian data dan pencegahan kebocoran
 
@@ -84,7 +86,7 @@ Ketiga subset memiliki tugas berbeda:
 | Validasi, 10% | Memilih checkpoint, menghentikan pelatihan, dan memilih konfigurasi CLAHE. | 826 |
 | Uji, 20% | Membandingkan baseline dengan CLAHE terpilih pada tahap akhir. | 1.652 |
 
-Rasio 70/10/20 mengikuti slide dan rancangan yang dibahas dalam proposal. Ini merupakan pembagian yang dipilih untuk penelitian, bukan aturan universal. Proyek membangun ulang pembagian dari data utama; nama folder bawaan `train` atau `test` tidak lagi menentukan subset. Sumber pembagian yang digunakan program adalah kolom `split` pada manifest yang dibuat notebook di `hasil_notebook_full/manifest.csv`.
+Rasio 70/10/20 mengikuti slide dan rancangan yang dibahas dalam proposal. Ini merupakan pembagian yang dipilih untuk penelitian, bukan aturan universal. Proyek membangun ulang pembagian dari data utama; nama folder bawaan `train` atau `test` tidak lagi menentukan subset. Sumber pembagian yang digunakan program adalah kolom `split` pada manifest yang dibuat notebook di `aset_penelitian/hasil/manifest.csv`.
 
 Dua lutut dari pasien yang sama berpotensi memiliki ciri serupa. Jika satu citra masuk data latih dan citra pasien yang sama masuk data uji, hasil bisa terlalu optimistis. Karena itu, tujuh digit awal nama berkas digunakan sebagai kandidat ID pasien dan semua citra dengan ID yang sama ditempatkan pada subset yang sama. Data utama memiliki 4.130 kandidat ID unik. ID ini masih berupa heuristik nama berkas, belum dikonfirmasi dengan metadata pasien resmi.
 
@@ -146,7 +148,7 @@ Kelima skenario memakai pembagian data, model, augmentasi, dan pengaturan pelati
 
 Demonstrasi memakai satu citra asli dari setiap KL grade pada subset latih. Setiap baris menampilkan citra yang sama, mulai dari baseline sampai clip limit 1, 2, 3, dan 5, dengan grid tetap 8x8. Rentang tampilan dikunci 0-255 agar perbedaannya tidak dipengaruhi penyesuaian kontras otomatis saat gambar ditampilkan.
 
-![Perbandingan baseline dan CLAHE pada citra latih](hasil_notebook_full/perbandingan_clahe.png)
+![Perbandingan baseline dan CLAHE pada citra latih](aset_penelitian/hasil/perbandingan_clahe.png)
 
 Bagian **Tampilkan PNG asli dari dataset** menampilkan lima berkas PNG langsung dari dataset, satu per grade KL, beserta jalur sumbernya. Nama folder pada jalur menunjukkan pembagian bawaan Kaggle, sedangkan kolom `split` menunjukkan pembagian penelitian. Bagian **Perbandingan visual clip limit** menampilkan PNG sumber, B0, dan empat hasil CLAHE dari sumber yang sama. Jalankan **Pilot lima skenario** untuk melihat tabel metrik. Tabel pilot berasal dari satu epoch dengan seed 42 serta 40 citra latih dan 20 citra validasi yang sama untuk semua skenario. Pemilihan clip limit untuk penelitian utama memakai rekap validasi dari 15 run.
 
@@ -277,15 +279,14 @@ Gunakan `LATIH_UTAMA = False` dan `UJI_AKHIR = False` untuk membaca ulang atau m
 
 | Berkas atau folder | Isi |
 | --- | --- |
-| `data/raw/` | Citra dataset yang dipakai sebagai masukan. |
-| `hasil_notebook_full/audit.json` dan `inventory.csv` | Ringkasan audit dan inventaris citra. |
-| `hasil_notebook_full/manifest.csv` | Label dan subset setiap citra yang digunakan. |
-| `hasil_notebook_full/perbandingan_clahe.png` | Perbandingan visual lima skenario. |
-| `hasil_notebook_full/pilot_comparison.csv` dan `hasil_notebook_full/runs_terstruktur/pilot/` | Metrik dan checkpoint pilot. |
-| `hasil_notebook_full/runs_terstruktur/main/` | Riwayat dan checkpoint pelatihan utama setelah dijalankan. |
-| `hasil_notebook_full/validasi_per_seed.csv` dan `ringkasan_validasi.csv` | Rekap validasi setelah 15 run selesai. |
-| `hasil_notebook_full/uji_akhir/` | Metrik uji, confusion matrix, dan prediksi per citra setelah evaluasi akhir. |
-| `templates/` | Contoh struktur CSV kosong. |
+| `aset_penelitian/dataset/raw/` | Citra dataset yang dipakai sebagai masukan. |
+| `aset_penelitian/hasil/audit.json` dan `inventory.csv` | Ringkasan audit dan inventaris citra. |
+| `aset_penelitian/hasil/manifest.csv` | Label dan subset setiap citra yang digunakan. |
+| `aset_penelitian/hasil/perbandingan_clahe.png` | Perbandingan visual lima skenario. |
+| `aset_penelitian/hasil/pilot_comparison.csv` dan `aset_penelitian/hasil/runs_terstruktur/pilot/` | Metrik dan checkpoint pilot. |
+| `aset_penelitian/hasil/runs_terstruktur/main/` | Riwayat dan checkpoint pelatihan utama setelah dijalankan. |
+| `aset_penelitian/hasil/validasi_per_seed.csv` dan `ringkasan_validasi.csv` | Rekap validasi setelah 15 run selesai. |
+| `aset_penelitian/hasil/uji_akhir/` | Metrik uji, confusion matrix, dan prediksi per citra setelah evaluasi akhir. |
 
 Audit dan pilot sudah dijalankan pada data asli dengan bobot ImageNet. Notebook menyimpan hasil validasi untuk kelima skenario. Pelatihan utama dan evaluasi uji adalah tahap berikutnya. Kandidat ID pasien masih berasal dari nama berkas. Audit belum memeriksa near-duplicate atau mengonfirmasi diagnosis pada label dataset.
 

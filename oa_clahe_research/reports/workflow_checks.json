@@ -1,8 +1,0 @@
-{
-  "pilot_checkpoint_reload": true,
-  "pilot_test_evaluated": false,
-  "experiment_commands": 15,
-  "incomplete_selection_rejected": true,
-  "premature_test_evaluation_rejected": true,
-  "auto_test_ids_overlapping_primary": 811
-}
