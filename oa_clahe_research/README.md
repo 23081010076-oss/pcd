@@ -132,6 +132,20 @@ hasil = clahe.apply(citra_grayscale)
 
 Kelima skenario memakai pembagian data, model, augmentasi, dan pengaturan pelatihan yang sama. Masing-masing dilatih dengan seed 42, 123, dan 2026. Konfigurasi CLAHE dipilih berdasarkan rerata macro-F1 validasi dari tiga seed; rerata loss validasi digunakan jika nilainya seri. Sesudah pemilihan selesai, baseline dan konfigurasi terpilih dibandingkan pada data uji. Hasil uji tidak digunakan untuk memilih clip limit.
 
+### Melihat langsung hasil clip limit
+
+Demonstrasi memakai satu citra asli dari setiap KL grade pada subset latih. Setiap baris menampilkan citra yang sama, mulai dari baseline sampai clip limit 1, 2, 3, dan 5, dengan grid tetap 8x8. Rentang tampilan dikunci 0-255 agar perbedaannya tidak dipengaruhi penyesuaian kontras otomatis saat gambar ditampilkan.
+
+![Perbandingan baseline dan CLAHE pada citra latih](reports/clip_limit_demo/comparison.png)
+
+Untuk membuat kembali gambar dan menjalankan pilot yang belum tersedia:
+
+```powershell
+.\.venv\Scripts\python.exe demo_clip_limits.py
+```
+
+Hasil ada di [folder demonstrasi](reports/clip_limit_demo/README.md). `pilot_comparison.csv` memuat metrik aktual dari pilot satu epoch dengan seed42, 40 citra latih dan 20 validasi yang sama untuk seluruh skenario. Pilot yang sudah selesai dipakai kembali setelah konfigurasi, data, dan kode diperiksa. Data uji tidak dievaluasi. Perbandingan ini membantu memahami perlakuan, tetapi tidak dipakai untuk menetapkan clip limit terbaik pada penelitian utama.
+
 ## Preprocessing dan augmentasi
 
 Semua skenario menerima urutan pemrosesan yang sama. Perbedaannya hanya pada tahap CLAHE.

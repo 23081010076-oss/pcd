@@ -1,0 +1,6 @@
+path,label,split
+train/0/9244001R.png,0,train
+train/1/9538890R.png,1,train
+test/2/9768469L.png,2,train
+train/3/9896392R.png,3,train
+test/4/9688649L.png,4,train
