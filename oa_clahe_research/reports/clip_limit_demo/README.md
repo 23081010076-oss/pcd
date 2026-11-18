@@ -6,10 +6,4 @@ Bandingkan detail dan perubahan tekstur dalam satu baris. Clip limit yang lebih 
 
 Seluruh pilot memakai seed42, ImageNet, satu epoch, 40 citra latih dan 20 validasi yang sama, batch4. Angka pada pilot_comparison.csv adalah hasil aktual pilot, bukan hasil eksperimen utama. Sampel sangat kecil, validasi seimbang (4 per kelas), dan satu seed belum mewakili distribusi validasi lengkap ataupun variasi tiga seed. Jangan memilih konfigurasi terbaik dari demonstrasi ini. Data uji tidak dievaluasi. Checkpoint semua pilot berhasil dimuat ulang.
 
-Ulangi pembuatan demonstrasi dengan:
-
-```powershell
-.\.venv\Scripts\python.exe demo_clip_limits.py
-```
-
-Pilot lengkap yang sudah ada dipakai kembali setelah hash konfigurasi/data/kode diperiksa; checkpoint tidak ditimpa. Untuk penelitian utama, jalankan experiments.py --execute, kemudian summarize.py dan evaluate_final.py sesuai README.
+Gunakan [notebook kode lengkap](../../penelitian_oa_clahe_full_code.ipynb) untuk menjalankan audit, demonstrasi, pilot, pelatihan utama, dan evaluasi. Laporan ini merekam pelaksanaan sebelum alur dipindahkan ke notebook.

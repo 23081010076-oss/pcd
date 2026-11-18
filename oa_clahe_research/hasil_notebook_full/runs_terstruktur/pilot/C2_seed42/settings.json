@@ -1,0 +1,10 @@
+{
+  "scenario": "C2",
+  "seed": 42,
+  "pilot": true,
+  "signature": "0712bc17104b7ea8de2914e35b62112c0e26bed098bf262dfc234206c08fea60",
+  "weights": "IMAGENET1K_V1",
+  "train_samples": 40,
+  "val_samples": 20,
+  "device": "cpu"
+}

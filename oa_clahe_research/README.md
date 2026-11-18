@@ -6,6 +6,16 @@ Implementasi mengikuti slide proposal: satu model EfficientNet-B0, lima kelas Ke
 
 README ini menjelaskan cara menjalankan proyek sekaligus alasan setiap tahap. Hasil yang sudah diperoleh dibedakan dari rancangan yang masih perlu dijalankan. Teks proposal dan slide tersimpan di `references/`; laporan pelaksanaan ada di [reports/STATUS.md](reports/STATUS.md).
 
+## Jalankan penelitian dari Jupyter
+
+Buka [penelitian_oa_clahe_full_code.ipynb](penelitian_oa_clahe_full_code.ipynb), pilih kernel `.venv` proyek, lalu gunakan **Run All**. Notebook menampilkan hasil audit, distribusi kelas, gambar CLAHE, dan metrik pilot di bawah pembahasan masing-masing. Untuk pelatihan utama dan evaluasi akhir, gunakan sakelar pada sel pengaturan notebook. Kode audit, preprocessing, pelatihan, dan evaluasi tersedia langsung di dalam sel notebook. Keluaran notebook disimpan di `hasil_notebook_full/`.
+
+Jika kernel belum tersedia, pasang dependensi notebook di lingkungan proyek:
+
+```powershell
+.\.venv\Scripts\python.exe -m pip install ipykernel matplotlib
+```
+
 ## Panduan membaca
 
 - [Tujuan dan dasar penelitian](#tujuan-dan-dasar-penelitian)
@@ -56,7 +66,7 @@ Label dibaca dari folder kelas 0 sampai 4. Proyek ini tidak memberi label klinis
 
 ### Apa yang diperiksa dalam audit?
 
-`audit_data.py` memeriksa keterbacaan citra, dimensi, mode kanal, label folder, duplikasi piksel identik, konflik label untuk piksel identik, serta kandidat ID pasien. Audit membaca semua citra untuk integritas data, termasuk calon subset uji, tetapi tidak mengukur kinerja model pada data uji.
+Bagian **Audit dan pembagian data** pada notebook memeriksa keterbacaan citra, dimensi, mode kanal, label folder, duplikasi piksel identik, konflik label untuk piksel identik, serta kandidat ID pasien. Audit membaca semua citra untuk integritas data, termasuk calon subset uji, tetapi tidak mengukur kinerja model pada data uji.
 
 Citra dengan piksel identik cukup diwakili satu berkas dalam manifest. Jika piksel identik memiliki label berbeda, seluruh kelompok tersebut dikeluarkan dari manifest untuk dicatat sebagai konflik. Berkas asli tetap disimpan. Audit ini belum memeriksa kemiripan yang tidak identik (*near-duplicate*) atau memastikan ketepatan diagnosis label.
 
@@ -74,13 +84,13 @@ Ketiga subset memiliki tugas berbeda:
 | Validasi, 10% | Memilih checkpoint, menghentikan pelatihan, dan memilih konfigurasi CLAHE. | 826 |
 | Uji, 20% | Membandingkan baseline dengan CLAHE terpilih pada tahap akhir. | 1.652 |
 
-Rasio 70/10/20 mengikuti slide dan rancangan yang dibahas dalam proposal. Ini merupakan pembagian yang dipilih untuk penelitian, bukan aturan universal. Proyek membangun ulang pembagian dari data utama; nama folder bawaan `train` atau `test` tidak lagi menentukan subset. Sumber pembagian yang digunakan program adalah kolom `split` di `data/manifest.csv`.
+Rasio 70/10/20 mengikuti slide dan rancangan yang dibahas dalam proposal. Ini merupakan pembagian yang dipilih untuk penelitian, bukan aturan universal. Proyek membangun ulang pembagian dari data utama; nama folder bawaan `train` atau `test` tidak lagi menentukan subset. Sumber pembagian yang digunakan program adalah kolom `split` pada manifest yang dibuat notebook di `hasil_notebook_full/manifest.csv`.
 
 Dua lutut dari pasien yang sama berpotensi memiliki ciri serupa. Jika satu citra masuk data latih dan citra pasien yang sama masuk data uji, hasil bisa terlalu optimistis. Karena itu, tujuh digit awal nama berkas digunakan sebagai kandidat ID pasien dan semua citra dengan ID yang sama ditempatkan pada subset yang sama. Data utama memiliki 4.130 kandidat ID unik. ID ini masih berupa heuristik nama berkas, belum dikonfirmasi dengan metadata pasien resmi.
 
 Pembagian menggunakan `StratifiedGroupKFold`: kelompok dijaga tetap utuh sambil mengupayakan distribusi kelas yang serupa [dokumentasi scikit-learn][group-split]. Sepuluh fold dialokasikan menjadi tujuh untuk latih, satu validasi, dan dua uji. Ini adalah cara membentuk satu pembagian tetap, bukan menjalankan pelatihan cross-validation sepuluh kali. Rasio dapat mendekati target bila ukuran kelompok tidak memungkinkan pembagian tepat; pada hasil saat ini jumlah citra tepat 70/10/20.
 
-Split seed 42 menjaga pembagian tetap. Kelima skenario dan ketiga seed pelatihan menggunakan manifest yang sama. Audit tidak menemukan overlap kandidat ID atau piksel identik antarsubset. Jika pemetaan pasien terverifikasi tersedia, gunakan `audit_data.py --patient-map patients.csv`, dengan kolom `path,patient_id` dan path relatif terhadap `data/raw`. Perubahan pembagian setelah eksperimen dimulai memerlukan pengulangan seluruh run.
+Split seed 42 menjaga pembagian tetap. Kelima skenario dan ketiga seed pelatihan menggunakan manifest yang sama. Audit tidak menemukan overlap kandidat ID atau piksel identik antarsubset. Jika pemetaan pasien terverifikasi tersedia, isi `PATIENT_MAP` di sel pengaturan dengan lokasi CSV yang memiliki kolom `path,patient_id`. Kolom `path` berisi jalur relatif terhadap `DATASET`. Perubahan pembagian setelah eksperimen dimulai memerlukan pengulangan seluruh run.
 
 ## Memahami CLAHE, clip limit, dan grid 8x8
 
@@ -122,7 +132,7 @@ Alasan manfaat CLAHE perlu diuji juga didukung oleh **Pi dkk. (2023)**. Mereka m
 
 ### Contoh penerapan pada proyek
 
-Contoh berikut menunjukkan skenario C2. Implementasi bersama seluruh skenario ada di `core.py`, sedangkan nilainya disimpan di `config.json`.
+Contoh berikut menunjukkan skenario C2. Implementasi semua skenario ada pada fungsi `prepare_image` di notebook. Nilai clip limit tercantum di `CFG` pada sel pengaturan.
 
 ```python
 # citra_grayscale sudah berukuran 224x224 dan bertipe uint8.
@@ -136,15 +146,9 @@ Kelima skenario memakai pembagian data, model, augmentasi, dan pengaturan pelati
 
 Demonstrasi memakai satu citra asli dari setiap KL grade pada subset latih. Setiap baris menampilkan citra yang sama, mulai dari baseline sampai clip limit 1, 2, 3, dan 5, dengan grid tetap 8x8. Rentang tampilan dikunci 0-255 agar perbedaannya tidak dipengaruhi penyesuaian kontras otomatis saat gambar ditampilkan.
 
-![Perbandingan baseline dan CLAHE pada citra latih](reports/clip_limit_demo/comparison.png)
+![Perbandingan baseline dan CLAHE pada citra latih](hasil_notebook_full/perbandingan_clahe.png)
 
-Untuk membuat kembali gambar dan menjalankan pilot yang belum tersedia:
-
-```powershell
-.\.venv\Scripts\python.exe demo_clip_limits.py
-```
-
-Hasil ada di [folder demonstrasi](reports/clip_limit_demo/README.md). `pilot_comparison.csv` memuat metrik aktual dari pilot satu epoch dengan seed42, 40 citra latih dan 20 validasi yang sama untuk seluruh skenario. Pilot yang sudah selesai dipakai kembali setelah konfigurasi, data, dan kode diperiksa. Data uji tidak dievaluasi. Perbandingan ini membantu memahami perlakuan, tetapi tidak dipakai untuk menetapkan clip limit terbaik pada penelitian utama.
+Bagian **Tampilkan PNG asli dari dataset** menampilkan lima berkas PNG langsung dari dataset, satu per grade KL, beserta jalur sumbernya. Nama folder pada jalur menunjukkan pembagian bawaan Kaggle, sedangkan kolom `split` menunjukkan pembagian penelitian. Bagian **Perbandingan visual clip limit** menampilkan PNG sumber, B0, dan empat hasil CLAHE dari sumber yang sama. Jalankan **Pilot lima skenario** untuk melihat tabel metrik. Tabel pilot berasal dari satu epoch dengan seed 42 serta 40 citra latih dan 20 citra validasi yang sama untuk semua skenario. Pemilihan clip limit untuk penelitian utama memakai rekap validasi dari 15 run.
 
 ## Preprocessing dan augmentasi
 
@@ -206,7 +210,7 @@ bobot kelas k = N_latih / (5 * jumlah citra latih pada kelas k)
 
 Kelas yang lebih sedikit mendapat bobot lebih besar. Ini menyesuaikan kontribusi kesalahan dalam loss, tanpa menambah jumlah citra kelas tersebut. Perhitungan bobot tidak menggunakan data validasi atau uji. `CrossEntropyLoss` menerima bobot per kelas sebagaimana dijelaskan [PyTorch][cross-entropy]. Loss validasi memakai bobot kelas latih yang sama; accuracy dan macro-F1 tetap dihitung dari prediksi tanpa pembobotan loss.
 
-Parameter operasional tersimpan di `config.json`. Pada kode saat ini, batas epoch utama dibaca dari `max_epochs`; kunci `epochs` yang juga tercantum bukan pengendali loop utama. Pengaturan pilot berada di bagian `pilot`. Hindari mengubah konfigurasi setelah satu atau lebih run utama dimulai.
+Pengaturan operasional ada di `CFG` pada bagian 1 notebook. Batas epoch utama memakai `max_epochs`, sementara pengaturan pilot berada di `pilot`. Catat setiap perubahan sebelum memulai eksperimen.
 
 ## Seed, checkpoint, dan pemilihan konfigurasi
 
@@ -254,96 +258,36 @@ Pada evaluasi akhir, baseline dan konfigurasi CLAHE terpilih masing-masing diuji
 
 ## Instalasi dan urutan menjalankan proyek
 
-### 1. Siapkan lingkungan
-
-Jalankan perintah dari folder proyek. Lingkungan yang digunakan pada pilot adalah Python 3.14, PyTorch 2.9.0 CPU, dan torchvision 0.24.0. GPU CUDA tidak tersedia pada pemeriksaan tersebut. `.venv` yang sudah tersedia memakai beberapa paket sistem; `environment-lock.txt` mencatat versi aktual.
-
-Untuk pemasangan baru pada komputer lain atau lingkungan baru:
+Buka [notebook kode lengkap](penelitian_oa_clahe_full_code.ipynb) di Jupyter atau VS Code. Pilih kernel `.venv` proyek. Jika menyiapkan lingkungan baru dari PowerShell di folder proyek, gunakan:
 
 ```powershell
-cd D:\pcd\oa_clahe_research
 python -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt ipykernel matplotlib
 ```
 
-Pada lingkungan proyek yang sudah tersedia, gunakan langsung Python `.venv`. GPU dapat mempercepat pelatihan, tetapi pemasangan torch/torchvision harus sesuai driver dan versi CUDA. Jangan mencampur hasil dari protokol atau lingkungan berbeda tanpa mencatat perbedaannya.
+1. Jalankan sel **Pengaturan** dan **Siapkan dataset**. Notebook memakai direktori `DATASET` jika citra sudah tersedia, atau mengekstrak dan mengunduh arsip jika diperlukan.
+2. Jalankan **Audit dan pembagian data**, **Preprocessing dan augmentasi**, serta **Model dan metrik**. Hasil audit, distribusi kelas, contoh CLAHE, dan pemeriksaan tensor muncul pada bagian masing-masing.
+3. Jalankan **Fungsi pelatihan** dan **Pilot lima skenario**. Tabel dan confusion matrix validasi muncul setelah sel selesai.
+4. Untuk eksperimen utama, atur `LATIH_UTAMA = True` pada bagian 1 dan pilih **Run All**. Bagian 8 menampilkan rekap validasi dan memilih konfigurasi CLAHE setelah 15 run selesai.
+5. Setelah konfigurasi terpilih, atur `UJI_AKHIR = True` dan pilih **Run All**. Bagian 9 menampilkan perbandingan baseline dan CLAHE terpilih pada data uji.
 
-### 2. Unduh, audit, dan periksa data
-
-```powershell
-.\.venv\Scripts\python.exe download_data.py
-.\.venv\Scripts\python.exe audit_data.py
-.\.venv\Scripts\python.exe verify.py
-```
-
-Downloader menggunakan arsip yang sudah ada bila tersedia. Jika akses publik Kaggle berubah, unduh dari halaman sumber dan letakkan sebagai `data/dataset.zip`. Ikuti ketentuan penggunaan dataset untuk pemakaian dan redistribusi. Audit membentuk ulang manifest, sehingga tidak perlu diulang saat pelatihan utama sudah berlangsung.
-
-`verify.py` memeriksa bentuk tensor kelima skenario, nilai finite, konsistensi validasi dan seed, konfigurasi classifier, parameter yang dilatih, serta overlap kelompok. Pemeriksaan teknis ini tidak mengukur ketepatan klinis label atau membuktikan model sudah berkinerja baik.
-
-### 3. Jalankan pilot sebelum eksperimen lengkap
-
-```powershell
-.\.venv\Scripts\python.exe train.py --scenario B0 --seed 42 --pilot
-```
-
-Pilot adalah percobaan kecil untuk memastikan citra dapat dimuat, model melakukan forward/backward, optimizer bekerja, validasi berjalan, dan checkpoint dapat disimpan serta dimuat ulang. Pilot menggunakan delapan citra per kelas latih (40 total), empat per kelas validasi (20 total), batch 4, satu epoch, serta bobot ImageNet resmi. Subset uji tidak dievaluasi.
-
-Pilot sudah selesai pada proyek ini dan disimpan di `runs/pilot/B0_seed42/`. Perintah akan menolak menimpa checkpoint yang ada; untuk mengulang, arsipkan folder run tersebut terlebih dahulu. Opsi `--random-weights` hanya tersedia untuk pilot dan akan menandai penggunaan bobot acak. Hasil pilot kecil tidak digunakan untuk memilih CLAHE atau mengisi rekap eksperimen utama.
-
-### 4. Jalankan lima belas pelatihan utama
-
-```powershell
-# Cetak 15 perintah dan simpan rencana, tanpa memulai pelatihan:
-.\.venv\Scripts\python.exe experiments.py
-# Jalankan 5 skenario x 3 seed secara berurutan:
-.\.venv\Scripts\python.exe experiments.py --execute
-# Alternatif jika ingin menjalankan satu run secara terpisah:
-.\.venv\Scripts\python.exe train.py --scenario C2 --seed 123
-```
-
-Run utama memakai seluruh subset latih dan validasi pada manifest. Setiap run menyimpan keluaran sendiri di `runs/main/`. Pelatihan CPU dapat memerlukan waktu jauh lebih lama daripada pilot. Skrip tidak memiliki mekanisme resume optimizer: run yang sudah mempunyai `best.pt` ditolak agar tidak tertimpa. Jika melanjutkan pekerjaan yang terputus, periksa kelengkapan setiap run dan jalankan perintah yang belum selesai secara terpisah; arsipkan run yang perlu diulang.
-
-### 5. Rekap validasi dan bekukan konfigurasi terpilih
-
-```powershell
-.\.venv\Scripts\python.exe summarize.py
-```
-
-Skrip memeriksa kelengkapan 15 run dan kecocokan konfigurasi, manifest, serta kode yang dicatat. `results/per_seed.csv` berisi hasil setiap run, `results/summary.csv` berisi rerata dan simpangan baku, sedangkan `results/selection.json` mencatat konfigurasi terpilih dan hash checkpoint untuk evaluasi final. Jika run belum lengkap, seleksi ditolak. CSV yang baru berisi header bukan berarti seluruh eksperimen sudah selesai.
-
-### 6. Evaluasi akhir pada data uji
-
-```powershell
-.\.venv\Scripts\python.exe evaluate_final.py
-```
-
-Jalankan setelah seleksi selesai. Skrip memeriksa seleksi dan checkpoint sebelum citra uji dievaluasi, lalu menyimpan hasil di `results/final/`. Folder final yang sudah ada tidak ditimpa. Jika proses terputus, periksa hasil dan tanda `COMPLETE` sebelum mengarsipkan folder serta memutuskan pengulangan. Hasil uji tidak digunakan untuk mengubah konfigurasi atau mengulang pencarian clip limit.
+Gunakan `LATIH_UTAMA = False` dan `UJI_AKHIR = False` untuk membaca ulang atau menjalankan audit dan pilot saja. Pelatihan utama dapat memakan waktu lama di CPU. Checkpoint yang lengkap dan cocok dengan konfigurasi, manifest, serta kode dapat dipakai kembali.
 
 ## Berkas keluaran dan status pekerjaan
 
-| Berkas atau folder | Isi dan kegunaan |
+| Berkas atau folder | Isi |
 | --- | --- |
-| `config.json` | Pengaturan eksperimen utama dan pilot. |
-| `download_data.py`, `data/download.json` | Unduhan dataset dan identitas arsip. |
-| `audit_data.py`, `reports/audit.json` | Pemeriksaan data dan ringkasan audit. |
-| `data/inventory.csv` | Inventaris citra, label, ukuran, hash, dan kandidat ID pasien. |
-| `data/manifest.csv` | Citra yang digunakan beserta pembagian train/val/test. |
-| `data/duplicates.csv`, `data/corrupt.csv` | Catatan temuan duplikasi dan berkas rusak. |
-| `core.py` | Preprocessing, model, dan perhitungan metrik bersama. |
-| `train.py`, `experiments.py` | Satu pelatihan dan pengatur 15 pelatihan. |
-| `runs/main/<skenario>_seed<seed>/settings.json` | Pengaturan dan identitas data/kode pada satu run. |
-| `history.csv` pada folder run | Perubahan loss dan metrik validasi setiap epoch. |
-| `best.pt`, `best_metrics.json` pada folder run | Bobot checkpoint terpilih dan metrik validasinya. |
-| `verification.json` pada folder run | Hasil pemeriksaan pemuatan ulang checkpoint. |
-| `summarize.py`, `results/` | Rekap per seed, rerata/SD, dan seleksi CLAHE. |
-| `evaluate_final.py`, `results/final/` | Metrik uji, confusion matrix, dan prediksi per citra. |
-| `templates/` | Contoh struktur CSV kosong; tidak diisi angka perkiraan. |
-| `references/` | Ekstraksi teks dan checksum proposal/slide sumber. |
-| `reports/STATUS.md` | Hasil pelaksanaan serta keterbatasan yang tercatat. |
+| `data/raw/` | Citra dataset yang dipakai sebagai masukan. |
+| `hasil_notebook_full/audit.json` dan `inventory.csv` | Ringkasan audit dan inventaris citra. |
+| `hasil_notebook_full/manifest.csv` | Label dan subset setiap citra yang digunakan. |
+| `hasil_notebook_full/perbandingan_clahe.png` | Perbandingan visual lima skenario. |
+| `hasil_notebook_full/pilot_comparison.csv` dan `hasil_notebook_full/runs_terstruktur/pilot/` | Metrik dan checkpoint pilot. |
+| `hasil_notebook_full/runs_terstruktur/main/` | Riwayat dan checkpoint pelatihan utama setelah dijalankan. |
+| `hasil_notebook_full/validasi_per_seed.csv` dan `ringkasan_validasi.csv` | Rekap validasi setelah 15 run selesai. |
+| `hasil_notebook_full/uji_akhir/` | Metrik uji, confusion matrix, dan prediksi per citra setelah evaluasi akhir. |
+| `templates/` | Contoh struktur CSV kosong. |
 
-Pada pelaksanaan awal, audit dan pilot berhasil memakai data asli serta bobot ImageNet. Pilot menghasilkan accuracy validasi 0,15 dan macro-F1 0,122727 pada 20 citra validasi. Ukuran percobaan ini terlalu kecil dan pelatihannya terlalu singkat untuk menjadi kesimpulan penelitian. Nilai tersebut hanya mencatat bahwa alur program dapat berjalan.
-
-Rencana 15 pelatihan sudah diperiksa, tetapi eksperimen utama dan evaluasi uji belum dijalankan pada tahap pelaksanaan awal tersebut. Hasil baru harus dibaca dari folder run dan rekap yang dihasilkan, bukan diasumsikan dari status awal README. Data uji belum dievaluasi pada pilot. Identitas pasien resmi, near-duplicate, dan kebenaran diagnosis label masih memerlukan verifikasi lebih lanjut. Penelitian ini belum memberikan validasi klinis atau bukti generalisasi lintas rumah sakit.
+Audit dan pilot sudah dijalankan pada data asli dengan bobot ImageNet. Notebook menyimpan hasil validasi untuk kelima skenario. Pelatihan utama dan evaluasi uji adalah tahap berikutnya. Kandidat ID pasien masih berasal dari nama berkas. Audit belum memeriksa near-duplicate atau mengonfirmasi diagnosis pada label dataset.
 
 ## Referensi
 

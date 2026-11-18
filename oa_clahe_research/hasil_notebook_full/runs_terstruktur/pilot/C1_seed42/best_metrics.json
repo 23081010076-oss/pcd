@@ -1,0 +1,15 @@
+{
+  "epoch": 1,
+  "train_loss": 1.6147063970565796,
+  "val_loss": 1.6409133434295655,
+  "val_macro_f1": 0.10333333333333332,
+  "val_accuracy": 0.15,
+  "scenario": "C1",
+  "seed": 42,
+  "pilot": true,
+  "signature": "0712bc17104b7ea8de2914e35b62112c0e26bed098bf262dfc234206c08fea60",
+  "weights": "IMAGENET1K_V1",
+  "train_samples": 40,
+  "val_samples": 20,
+  "device": "cpu"
+}

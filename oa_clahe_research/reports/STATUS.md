@@ -32,4 +32,4 @@ Kelima skenario menghasilkan tensor 3x224x224 finite; validasi deterministik; au
 
 Tidak ada hambatan dataset/bobot untuk pilot. Eksperimen lengkap belum dijalankan sesuai lingkup permintaan, sehingga belum ada rerata/SD tiga seed, CLAHE terpilih, atau metrik uji. GPU CUDA tidak tersedia; 15 pelatihan sampai maksimum150 epoch akan lebih berat daripada pilot. Identitas pasien resmi dan near-duplicate masih belum terverifikasi. Hasil kelak terbatas pada dataset/protokol ini.
 
-Jalankan `experiments.py --execute`, lalu `summarize.py`, lalu `evaluate_final.py` dengan Python .venv. README memuat perintah lengkap. Jangan mengubah manifest/config/kode setelah eksperimen dimulai; ulangi semua run jika protokol berubah.
+Gunakan [notebook kode lengkap](../penelitian_oa_clahe_full_code.ipynb) untuk menjalankan audit, demonstrasi, pilot, pelatihan utama, dan evaluasi. Laporan ini merekam pelaksanaan sebelum alur dipindahkan ke notebook.
