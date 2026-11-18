@@ -1,0 +1,36 @@
+{
+  "passed": true,
+  "scenario_tensor_shapes": {
+    "B0": [
+      3,
+      224,
+      224
+    ],
+    "C1": [
+      3,
+      224,
+      224
+    ],
+    "C2": [
+      3,
+      224,
+      224
+    ],
+    "C3": [
+      3,
+      224,
+      224
+    ],
+    "C5": [
+      3,
+      224,
+      224
+    ]
+  },
+  "validation_deterministic": true,
+  "augmentation_reproducible": true,
+  "classifier_initialization_reproducible": true,
+  "all_parameters_trainable": true,
+  "group_and_pixel_overlap": false,
+  "test_evaluated": false
+}

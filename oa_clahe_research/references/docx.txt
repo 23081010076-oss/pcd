@@ -1,0 +1,47 @@
+Judul: Analisis Pengaruh Parameter CLAHE terhadap Klasifikasi Tingkat Keparahan Osteoartritis Lutut pada Citra Rontgen Menggunakan CNN
+
+Latar Belakang:
+Osteoartritis lutut merupakan penyakit degeneratif pada sendi yang dapat menyebabkan nyeri, keterbatasan aktivitas, dan penurunan kualitas hidup. Citra rontgen merupakan salah satu pemeriksaan yang umum digunakan untuk menilai osteoartritis lutut, sedangkan tingkat keparahannya dapat diklasifikasikan menggunakan sistem Kellgren–Lawrence (KL) grade 0–4. Ahmed dan Mstafa menjelaskan bahwa fitur radiografis seperti penyempitan ruang sendi dan osteofit digunakan dalam penentuan tingkat keparahan berdasarkan lima grade KL.
+Perkembangan Convolutional Neural Network (CNN) memungkinkan proses klasifikasi tingkat keparahan osteoartritis dilakukan secara otomatis dari citra rontgen. Penelitian sebelumnya telah menunjukkan bahwa CNN dan deep learning mampu digunakan untuk mengklasifikasikan tingkat keparahan osteoartritis lutut. Pi et al. menggunakan 8.260 citra X-ray lutut dan menghasilkan model ensemble untuk prediksi KL grade dengan akurasi 76,93% dan F1-score 0,7665.
+Namun, kualitas citra sebelum masuk ke CNN juga berpengaruh terhadap informasi visual yang dapat dipelajari model. CLAHE merupakan salah satu metode peningkatan kontras yang banyak digunakan pada citra medis. Ahmed dan Mstafa secara khusus menyatakan bahwa CLAHE memiliki dua parameter penting, yaitu clip limit dan jumlah tile, dan bahwa perubahan parameter tersebut dapat memberikan dampak terhadap hasil pemrosesan; penelitian mereka menggunakan clip limit 5,0 dan tile 8×8.
+Di sisi lain, hasil penelitian terdahulu belum menunjukkan bahwa penggunaan CLAHE selalu memberikan peningkatan kinerja CNN. Pi et al. menguji histogram normalization, histogram equalization, dan CLAHE pada klasifikasi OA lutut dan melaporkan bahwa metode-metode tersebut tidak menghasilkan peningkatan performa yang signifikan; pada beberapa kondisi performa justru menurun. Sementara itu, Pandey et al. pada tahun 2025 menunjukkan bahwa CLAHE merupakan salah satu preprocessing yang memberikan performa terbaik dalam klasifikasi lima grade KL menggunakan CNN, dengan accuracy 85%, F1-score 0,72, dan AUC 0,83.
+Berdasarkan kondisi tersebut, terdapat kebutuhan untuk melakukan analisis yang lebih terkontrol terhadap pengaruh variasi parameter CLAHE terhadap kinerja CNN, khususnya pada klasifikasi tingkat keparahan osteoartritis lutut berdasarkan citra rontgen.
+Permasalahan:
+Citra X-ray OA lutut memiliki karakteristik kontras yang berbeda, sehingga fitur radiografis seperti penyempitan ruang sendi dan osteofit tidak selalu mudah dipelajari CNN.
+CLAHE memiliki parameter yang memengaruhi hasil enhancement, terutama clip limit dan tile/grid size, sehingga penggunaan nilai parameter yang berbeda berpotensi menghasilkan kualitas citra dan performa klasifikasi yang berbeda. Ahmed dan Mstafa secara eksplisit menyebut kedua parameter tersebut sebagai parameter penting CLAHE.
+Hasil penelitian terdahulu belum konsisten mengenai manfaat CLAHE. Pandey et al. mendapatkan hasil terbaik dengan CLAHE, sedangkan Pi et al. melaporkan bahwa CLAHE tidak memberikan peningkatan signifikan dan pada beberapa kondisi performa menurun.
+
+Metodologi Penelitian:
+	Penelitian dilakukan dengan pendekatan eksperimen menggunakan dataset citra rontgen lutut publik yang memiliki label KL grade 0–4. Penelitian membandingkan beberapa konfigurasi preprocessing CLAHE, sedangkan arsitektur dan konfigurasi CNN dibuat tetap sehingga perubahan kinerja model dapat dikaitkan dengan perubahan parameter CLAHE. 
+
+Metode yang digunakan:
+Dataset
+Sebagai pembanding, Pandey et al. menggunakan 8.260 citra X-ray lutut grayscale berlabel KL grade 0–4, dengan pembagian training 70%, validation 10%, dan testing 20%. 
+
+Preprocessing
+Citra X-ray → grayscale bila diperlukan
+Resize ke ukuran input CNN, misalnya 224×224
+CLAHE dengan beberapa konfigurasi parameter
+Normalisasi
+Augmentasi hanya pada data training
+
+Parameter yang dianalisis
+	
+
+CNN
+Kami menggunakan EfficientNet-B0 atau ResNet50
+
+Penelitihan terdahulu:
+
+
+Eksperimen  | Clip Limit | Tile Grid
+Baseline | Tanpa CLAHE | -
+CLAHE-1 | 1.0 | 8×8
+CLAHE-2 | 2.0 | 8×8
+CLAHE-3 | 3.0 | 8×8
+CLAHE-4 | 5.0 | 8×8
+Judul | Keyword | Hasil | Research Gap | Kesimpulan
+Ahmed & Mstafa (2022), “Identifying Severity Grading of Knee Osteoarthritis from X-ray Images Using an Efficient Mixture of Deep Learning and Machine Learning Models” | Knee OA, X-ray, KL grading, CLAHE, CNN, transfer learning, SVM | Menggunakan dataset OAI sebanyak 9.786 citra X-ray. CLAHE digunakan dalam preprocessing dengan clip limit 5,0 dan tile 8×8. Model DHL-I berbasis fitur CNN + PCA + SVM memperoleh akurasi rata-rata 74,57% untuk lima grade KL. | CLAHE sudah digunakan pada OA lutut, tetapi penelitian tidak menjadikan perbandingan variasi parameter CLAHE pada CNN yang sama sebagai fokus utama. | Menunjukkan bahwa CLAHE relevan untuk X-ray OA dan parameter CLAHE memang penting terhadap hasil preprocessing.
+Pi et al. (2023), “Ensemble Deep-Learning Networks for Automated Osteoarthritis Grading in Knee X-ray Images” | Knee OA, X-ray, KL grading, CNN, ensemble, deep learning | Menggunakan 8.260 citra OAI dan menghasilkan ensemble network dengan accuracy 76,93% dan F1-score 0,7665. Peneliti juga mencoba histogram normalization, histogram equalization, dan CLAHE. | Hasil preprocessing tidak selalu positif; CLAHE dan metode enhancement lain tidak meningkatkan performa secara signifikan dan pada beberapa kondisi performa menurun. Namun, penelitian tidak memfokuskan analisis pada parameter CLAHE. | Menunjukkan bahwa peningkatan kontras tidak otomatis meningkatkan performa CNN sehingga perlu evaluasi preprocessing yang lebih terkontrol.
+Pandey, Rijal & Gaire (2025), “Knee Osteoarthritis Severity Classification Using CNN and Image Enhancement Filters” | KOA, X-ray, KL grade, CNN, CLAHE, image enhancement | Menggunakan 8.260 X-ray KL grade 0–4. Mereka membandingkan beberapa filter seperti Sobel, Gaussian, CLAHE, Gabor, dan Entropy. CLAHE memberikan hasil terbaik pada 5-layer CNN dengan accuracy 85%, F1-score 0,72, dan AUC 0,83. | Penelitian ini sangat dekat dengan penelitianmu, tetapi fokusnya adalah membandingkan beberapa metode enhancement, bukan melakukan analisis sistematis terhadap variasi parameter internal CLAHE. | Membuktikan bahwa CLAHE berpotensi meningkatkan klasifikasi KOA, khususnya pada kelas tingkat lanjut, tetapi grade awal masih sulit dibedakan.
+Muttaqin et al. (2025), “A Combination Method of ROI, CLAHE, and DenseNet-169 for Hip Osteoarthritis Detection” | Osteoarthritis, X-ray, CLAHE, ROI, DenseNet-169 | Menggunakan 750 X-ray hip yang dibagi menjadi normal, mild, dan severe. Kombinasi ROI + CLAHE + DenseNet-169 menghasilkan accuracy 98,67%, precision 98,70%, recall 98,67%, dan F1-score 98,66%. | Objek penelitian adalah hip OA, bukan knee OA, dan CLAHE digunakan sebagai preprocessing tetap, bukan sebagai variabel yang dianalisis parameternya. | Menguatkan bahwa CLAHE dapat menjadi preprocessing yang efektif pada citra X-ray OA ketika dikombinasikan dengan CNN/DenseNet.
