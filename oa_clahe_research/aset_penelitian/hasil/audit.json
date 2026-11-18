@@ -1,57 +1,14 @@
 {
   "root": "D:\\pcd\\oa_clahe_research\\aset_penelitian\\dataset\\raw",
   "readable": 9786,
-  "corrupt": [],
-  "unlabeled": [],
-  "class_counts": {
-    "0": 3857,
-    "1": 1770,
-    "2": 2578,
-    "3": 1286,
-    "4": 295
-  },
-  "sizes": "{(224, 224): 9786}",
-  "modes": {
-    "L": 9786
-  },
-  "duplicate_extra_images": 0,
-  "conflicting_hash_groups": 0,
-  "excluded_conflict_images": 0,
-  "retained": 8260,
-  "patient_id_sources": {
-    "filename_heuristic": 9786
-  },
-  "patient_id_note": "Seven digit prefix is a filename heuristic, not independently verified clinical metadata.",
-  "split_counts": {
-    "train": 5782,
-    "test": 1652,
-    "val": 826
-  },
-  "original_split_counts": {
-    "train": 5778,
-    "test": 1656,
-    "auto_test": 1526,
-    "val": 826
-  },
-  "split_method": "10 stratified group folds: 7 train, 1 val, 2 test; rasio mendekati 70/10/20; split_seed tetap",
-  "leakage_checks": "Tidak ada overlap group, ID pasien yang tersedia, atau piksel identik antar subset. Near-duplicate belum diuji.",
-  "auxiliary_images_excluded": 1526,
   "primary_images": 8260,
-  "primary_class_counts": {
-    "0": 3253,
-    "1": 1495,
-    "2": 2175,
-    "3": 1086,
-    "4": 251
-  },
-  "valid_images": 9786,
+  "retained": 8260,
+  "auxiliary_images_excluded": 1526,
   "corrupt_images": 0,
   "ignored_images": 0,
-  "conflicting_pixel_groups": 0,
-  "retained_images": 8260,
-  "patients_available": 8260,
+  "duplicate_extra_images": 0,
+  "conflicting_hash_groups": 0,
   "unique_patient_ids": 4130,
-  "dimensions": "{(224, 224): 9786}",
   "split_class_counts": {
     "test": {
       "0": 651,
